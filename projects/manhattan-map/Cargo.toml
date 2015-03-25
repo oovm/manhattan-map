@@ -1,0 +1,21 @@
+[package]
+name = "manhattan-map"
+version = "0.0.0"
+authors = ["Aster <192607617@qq.com>"]
+description = "Coordinate transformation and pathfinding for hexagonal maps"
+repository = "https://github.com/oovm/hexagon-map"
+documentation = "https://docs.rs/hexagon-map"
+readme = "Readme.md"
+license = "MPL-2.0"
+edition = "2021"
+
+[dependencies]
+itertools = "0.10.5"
+serde = { version = "1.0.159", features = ["derive"] }
+shape-core = "0.1.1"
+ndarray = "0.15.6"
+
+[dev-dependencies]
+
+[features]
+default = []
