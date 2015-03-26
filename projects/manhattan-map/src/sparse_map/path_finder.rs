@@ -3,13 +3,13 @@ use super::*;
 /// A* path finder on a hexagon map.
 pub struct PathFinder<'a, T> {
     map: &'a HexagonMap<T>,
-    start: AxialPoint,
-    end: AxialPoint,
-    open: BTreeSet<AxialPoint>,
-    close: BTreeSet<AxialPoint>,
-    passable: Box<dyn Fn(&AxialPoint, &T) -> bool>,
+    start: Point,
+    end: Point,
+    open: BTreeSet<Point>,
+    close: BTreeSet<Point>,
+    passable: Box<dyn Fn(&Point, &T) -> bool>,
     action_point: Option<f64>,
-    action_cost: Box<dyn Fn(&AxialPoint, &T) -> f64>,
+    action_cost: Box<dyn Fn(&Point, &T) -> f64>,
 }
 
 impl<T> HexagonMap<T> {
@@ -26,7 +26,7 @@ impl<T> HexagonMap<T> {
     /// ```
     /// # use hexagon_map::HexagonMap;
     /// ```
-    pub fn path_finder(&self, start: &AxialPoint, end: &AxialPoint) -> PathFinder<T> {
+    pub fn path_finder(&self, start: &Point, end: &Point) -> PathFinder<T> {
         let mut open = BTreeSet::new();
         open.insert(start.clone());
         PathFinder {
@@ -58,7 +58,7 @@ impl<'a, T> PathFinder<'a, T> {
     /// ```
     pub fn with_passable<F>(mut self, passable: F) -> Self
     where
-        F: Fn(&AxialPoint, &T) -> bool + 'static,
+        F: Fn(&Point, &T) -> bool + 'static,
     {
         self.passable = Box::new(passable);
         self
@@ -100,29 +100,29 @@ impl<'a, T> PathFinder<'a, T> {
     /// ```
     pub fn with_cost<F>(mut self, cost: F) -> Self
     where
-        F: Fn(&AxialPoint, &T) -> f64 + 'static,
+        F: Fn(&Point, &T) -> f64 + 'static,
     {
         self.action_point = Some(0.0);
         self.action_cost = Box::new(cost);
         self
     }
-    pub fn get_point(&self, point: &AxialPoint) -> Option<&T> {
-        self.map.sparse.get(point)
+    pub fn get_point(&self, point: &Point) -> Option<&T> {
+        self.map.dense.get(point)
     }
-    pub fn has_point(&self, point: &AxialPoint) -> bool {
-        self.map.sparse.contains_key(point)
+    pub fn has_point(&self, point: &Point) -> bool {
+        self.map.dense.contains_key(point)
     }
-    pub fn distance_to_start(&self, point: &AxialPoint) -> usize {
+    pub fn distance_to_start(&self, point: &Point) -> usize {
         self.start.manhattan_distance(point)
     }
-    pub fn distance_to_end(&self, point: &AxialPoint) -> usize {
+    pub fn distance_to_end(&self, point: &Point) -> usize {
         self.end.manhattan_distance(point)
     }
     /// Get all passable neighbors from a point
-    pub fn neighbors(&self, point: &AxialPoint) -> Vec<AxialPoint> {
+    pub fn neighbors(&self, point: &Point) -> Vec<Point> {
         let mut neighbors = vec![];
         for direction in Direction::all() {
-            if let Some(target) = self.map.sparse.get(&point.go(direction)) {
+            if let Some(target) = self.map.dense.get(&point.go(direction)) {
                 if (self.passable)(point, target) {
                     neighbors.push(point.go(direction));
                 }
@@ -133,7 +133,7 @@ impl<'a, T> PathFinder<'a, T> {
     fn fast_reject(&self) -> bool {
         !self.has_point(&self.start) || !self.has_point(&self.end)
     }
-    pub fn solve_path(mut self) -> Option<Vec<AxialPoint>> {
+    pub fn solve_path(mut self) -> Option<Vec<Point>> {
         if self.fast_reject() {
             return None;
         }
@@ -166,7 +166,7 @@ impl<'a, T> PathFinder<'a, T> {
     //     }
     //     Some(path)
     // }
-    fn reconstruct_path(&self, current: &AxialPoint) -> Vec<AxialPoint> {
+    fn reconstruct_path(&self, current: &Point) -> Vec<Point> {
         let _ = vec![*current];
         todo!()
     }

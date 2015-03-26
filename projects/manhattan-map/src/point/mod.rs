@@ -1,48 +1,40 @@
 use serde::{Serialize, Deserialize};
 use std::fmt::{Debug, Display, Formatter};
 
-pub mod s_point;
-pub mod w_point;
-pub mod h_point;
-
 mod display;
 mod convert;
 
 /// A point in axial coordinates, standard form of a hexagon map
 #[derive(Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Hash, Serialize, Deserialize)]
-pub struct AxialPoint {
-    pub q: isize,
-    pub r: isize,
+pub struct Point {
+    pub x: isize,
+    pub y: isize,
 }
-
 
 #[derive(Copy, Clone, Debug, Ord, PartialOrd, Eq, PartialEq, Hash, Serialize, Deserialize)]
 pub enum Direction {
-    /// - `S-true means right`
     /// - `S-false means left`
-    S(bool),
-    R(bool),
-    Q(bool),
+    X(bool),
+    /// - `S-true means right`
+    Y(bool),
 }
 
 impl Direction {
-    pub fn all() -> [Direction; 6] {
+    pub fn all() -> [Direction; 4] {
         [
-            Direction::S(true),
-            Direction::S(false),
-            Direction::R(true),
-            Direction::R(false),
-            Direction::Q(true),
-            Direction::Q(false),
+            Direction::X(true),
+            Direction::X(false),
+            Direction::Y(true),
+            Direction::Y(false),
         ]
     }
 }
 
 
-impl AxialPoint {
+impl Point {
     /// Create a new point in axial coordinates
     pub fn new(q: isize, r: isize) -> Self {
-        Self { q, r }
+        Self { x: q, y: r }
     }
     /// Create a new point in axial coordinates from pixel coordinates
     pub fn from_pixel(x: f64, y: f64, radius: f64) -> Self {
@@ -52,8 +44,8 @@ impl AxialPoint {
     }
     /// Get the pixel coordinates of the center of the hexagon
     pub fn get_center(&self, radius: f64) -> (f64, f64) {
-        let x = radius * 3.0f64.sqrt() * (self.q as f64 + self.r as f64 / 2.0);
-        let y = radius * 3.0 / 2.0 * self.r as f64;
+        let x = radius * 3.0f64.sqrt() * (self.x as f64 + self.y as f64 / 2.0);
+        let y = radius * 3.0 / 2.0 * self.y as f64;
         (x, y)
     }
     /// Get the pixel coordinates of the corners of the hexagon
@@ -74,16 +66,16 @@ impl AxialPoint {
     }
 }
 
-impl AxialPoint {
+impl Point {
     /// Get the pixel coordinates of the center of the hexagon
     pub fn go(&self, direction: Direction) -> Self {
         match direction {
-            Direction::S(true) => Self::new(self.q + 1, self.r - 1),
-            Direction::S(false) => Self::new(self.q - 1, self.r + 1),
-            Direction::R(true) => Self::new(self.q + 1, self.r),
-            Direction::R(false) => Self::new(self.q - 1, self.r),
-            Direction::Q(true) => Self::new(self.q, self.r - 1),
-            Direction::Q(false) => Self::new(self.q, self.r + 1),
+            Direction::X(true) => Self::new(self.x + 1, self.y - 1),
+            Direction::X(false) => Self::new(self.x - 1, self.y + 1),
+            Direction::Y(true) => Self::new(self.x + 1, self.y),
+            Direction::Y(false) => Self::new(self.x - 1, self.y),
+            Direction::Q(true) => Self::new(self.x, self.y - 1),
+            Direction::Q(false) => Self::new(self.x, self.y + 1),
         }
     }
     /// Calculate the euclidean distance between two points
@@ -94,7 +86,7 @@ impl AxialPoint {
     }
     /// Calculate the manhattan distance between two points
     pub fn manhattan_distance(&self, other: &Self) -> usize {
-        ((self.q - other.q).abs() + (self.r - other.r).abs()) as usize
+        ((self.x - other.x).abs() + (self.y - other.y).abs()) as usize
     }
 }
 

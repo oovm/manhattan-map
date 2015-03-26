@@ -1,4 +1,4 @@
-use hexagon_map::{AxialPoint, HexagonMap};
+use manhattan_map::{HexagonMap, Point};
 
 #[test]
 fn ready() {
@@ -19,7 +19,7 @@ fn test() {
 #[test]
 fn test2() {
     let map = HexagonMap::<bool>::width_first(3, 4, true);
-    let cost = map.action_field(AxialPoint::new(0, 0), 10.0).with_cost(|p, _| (p.r + p.q).abs() as f64);
+    let cost = map.action_field(Point::new(0, 0), 10.0).with_cost(|p, _| (p.r + p.q).abs() as f64);
     for (p, maze) in cost {
         println!("{p}: {maze}")
     }
