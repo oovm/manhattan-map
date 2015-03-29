@@ -1,4 +1,4 @@
-use crate::{point::Point, Direction, HPoint, WPoint};
+use crate::{point::Point, Direction};
 use itertools::Itertools;
 use std::{
     cmp::Ordering,
@@ -29,49 +29,6 @@ impl<T: Default> HexagonMap<T> {
         for x in 0..width {
             for y in 0..height {
                 map.insert(Point::new(x as isize, y as isize), Default::default());
-            }
-        }
-        Self { dense: map }
-    }
-    /// Create a width first hexagon map.
-    ///
-    /// # Arguments
-    ///
-    /// * `width`: row count
-    /// * `height`: column count
-    /// * `odd_left`: Fill the extra line at left if width is odd.
-    ///
-    /// returns: HexagonMap<T>
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// # use hexagon_map::HexagonMap;
-    /// let map = HexagonMap::<u8>::width_first(5, 5, true);
-    /// assert_eq!(map.count_points(), 10)
-    /// ```
-    pub fn width_first(rows: usize, columns: usize, odd_left: bool) -> Self {
-        let mut map = BTreeMap::new();
-        for x in 0..rows {
-            for y in 0..columns {
-                let point = match rows % 2 {
-                    1 if odd_left => WPoint::new(x as isize - 1, y as isize),
-                    _ => WPoint::new(x as isize, y as isize),
-                };
-                map.insert(point.into(), Default::default());
-            }
-        }
-        Self { dense: map }
-    }
-    pub fn height_first(rows: usize, columns: usize, odd_up: bool) -> Self {
-        let mut map = BTreeMap::new();
-        for y in 0..columns {
-            for x in 0..rows {
-                let point = match columns % 2 {
-                    1 if odd_up => HPoint::new(x as isize, y as isize - 1),
-                    _ => HPoint::new(x as isize, y as isize),
-                };
-                map.insert(point.into(), Default::default());
             }
         }
         Self { dense: map }

@@ -1,5 +1,6 @@
 use serde::{Serialize, Deserialize};
 use std::fmt::{Debug, Display, Formatter};
+use std::str::FromStr;
 
 mod display;
 mod convert;
@@ -70,12 +71,10 @@ impl Point {
     /// Get the pixel coordinates of the center of the hexagon
     pub fn go(&self, direction: Direction) -> Self {
         match direction {
-            Direction::X(true) => Self::new(self.x + 1, self.y - 1),
-            Direction::X(false) => Self::new(self.x - 1, self.y + 1),
-            Direction::Y(true) => Self::new(self.x + 1, self.y),
-            Direction::Y(false) => Self::new(self.x - 1, self.y),
-            Direction::Q(true) => Self::new(self.x, self.y - 1),
-            Direction::Q(false) => Self::new(self.x, self.y + 1),
+            Direction::X(true) => Self::new(self.x + 1, self.y),
+            Direction::X(false) => Self::new(self.x - 1, self.y),
+            Direction::Y(true) => Self::new(self.x, self.y + 1),
+            Direction::Y(false) => Self::new(self.x, self.y - 1),
         }
     }
     /// Calculate the euclidean distance between two points
