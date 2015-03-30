@@ -2,7 +2,7 @@ use super::*;
 use std::vec::IntoIter;
 
 pub struct ActionFieldSolver<'a, T> {
-    map: &'a ManhattanMap<T>,
+    map: &'a TaxicabMap<T>,
     open: BTreeMap<Point, f64>,
     close: BTreeMap<Point, f64>,
     passable: Box<dyn Fn(&Point, &T) -> bool>,
@@ -10,7 +10,7 @@ pub struct ActionFieldSolver<'a, T> {
     action_points: f64,
 }
 
-impl<T> ManhattanMap<T> {
+impl<T> TaxicabMap<T> {
     /// Set the passable function.
     ///
     /// # Arguments

@@ -11,13 +11,13 @@ pub mod action_field;
 pub mod path_finder;
 
 /// A dense manhattan map, if your map size will grow, or most areas will be blank, this is a better choice.
-pub struct ManhattanMap<T> {
+pub struct TaxicabMap<T> {
     dense: Array2<T>,
     cycle_x: bool,
     cycle_y: bool,
 }
 
-impl<T: Clone> ManhattanMap<T> {
+impl<T: Clone> TaxicabMap<T> {
     pub fn square(width: usize, fill: &T) -> Self {
         Self::rectangle(width, width)
     }
@@ -76,7 +76,7 @@ impl<T: Clone> ManhattanMap<T> {
     }
 }
 
-impl<T> ManhattanMap<T> {
+impl<T> TaxicabMap<T> {
     /// Get the value at a point, if it exists.
     pub fn get_point(&self, point: Point) -> Option<&T> {
         self.dense.get(&point)
@@ -121,7 +121,7 @@ impl<T> ManhattanMap<T> {
     }
 }
 
-impl<'i, T> IntoIterator for &'i ManhattanMap<T> {
+impl<'i, T> IntoIterator for &'i TaxicabMap<T> {
     type Item = (&'i Point, &'i T);
     type IntoIter = Iter<'i, Point, T>;
 

@@ -1,4 +1,4 @@
-use manhattan_map::{ManhattanMap};
+use manhattan_map::{TaxicabMap};
 
 #[test]
 fn ready() {
@@ -7,7 +7,7 @@ fn ready() {
 
 #[test]
 fn test() {
-    let map = ManhattanMap::<bool>::square(3, 4);
+    let map = TaxicabMap::<bool>::square(3, 4);
     for (p, maze) in &map {
         println!("{p}: {maze}")
     }

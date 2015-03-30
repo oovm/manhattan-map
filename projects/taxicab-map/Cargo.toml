@@ -1,5 +1,5 @@
 [package]
-name = "manhattan-map"
+name = "taxicab-map"
 version = "0.0.0"
 authors = ["Aster <192607617@qq.com>"]
 description = "Coordinate transformation and pathfinding for hexagonal maps"

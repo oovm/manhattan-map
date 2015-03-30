@@ -2,7 +2,7 @@ use super::*;
 
 /// A* path finder on a hexagon map.
 pub struct PathFinder<'a, T> {
-    map: &'a ManhattanMap<T>,
+    map: &'a TaxicabMap<T>,
     start: Point,
     end: Point,
     open: BTreeSet<Point>,
@@ -12,7 +12,7 @@ pub struct PathFinder<'a, T> {
     action_cost: Box<dyn Fn(&Point, &T) -> f64>,
 }
 
-impl<T> ManhattanMap<T> {
+impl<T> TaxicabMap<T> {
     /// Set the passable function.
     ///
     /// # Arguments
