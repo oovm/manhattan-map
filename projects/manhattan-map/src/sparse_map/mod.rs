@@ -4,38 +4,79 @@ use std::{
     cmp::Ordering,
     collections::{btree_map::Iter, BTreeMap, BTreeSet},
 };
+use std::mem::swap;
+use ndarray::Array2;
 
 pub mod action_field;
 pub mod path_finder;
 
-/// A sparse hexagon map, if your map size will grow, or most areas will be blank, this is a better choice.
-pub struct HexagonMap<T> {
-    dense: BTreeMap<Point, T>,
+/// A dense manhattan map, if your map size will grow, or most areas will be blank, this is a better choice.
+pub struct ManhattanMap<T> {
+    dense: Array2<T>,
+    cycle_x: bool,
+    cycle_y: bool,
 }
 
-impl<T: Default> HexagonMap<T> {
-    pub fn circle(diameter: usize) -> Self {
-        let mut map = BTreeMap::new();
-        for x in 0..diameter {
-            for y in 0..diameter {
-                let point = Point::new(x as isize, y as isize);
-                map.insert(point, Default::default());
-            }
-        }
-        Self { dense: map }
+impl<T: Clone> ManhattanMap<T> {
+    pub fn square(width: usize, fill: &T) -> Self {
+        Self::rectangle(width, width)
     }
-    pub fn rhombus(width: usize, height: usize) -> Self {
-        let mut map = BTreeMap::new();
-        for x in 0..width {
-            for y in 0..height {
-                map.insert(Point::new(x as isize, y as isize), Default::default());
+    pub fn rectangle(width: usize, height: usize, fill: &T) -> Self {
+        let mut map = Array2::default((width, height));
+        Self { cycle_x: false, cycle_y: false, dense: map }
+    }
+    pub fn with_cycle(mut self, cycle_x: bool, cycle_y: bool) -> Self {
+        self.cycle_x = cycle_x;
+        self.cycle_y = cycle_y;
+        self
+    }
+    pub fn get_cycle(&self) -> (bool, bool) {
+        (self.cycle_x, self.cycle_y)
+    }
+    pub fn set_cycle(&mut self, cycle_x: bool, cycle_y: bool) {
+        self.cycle_x = cycle_x;
+        self.cycle_y = cycle_y;
+    }
+    pub fn get_point(&self, point: Point) -> Option<&T> {
+        self.dense.get(point)
+    }
+    pub fn set_point(&mut self, point: Point, value: T) {
+        self.dense[point] = value;
+    }
+    pub fn extend(&mut self, direction: Direction, size: usize) {
+        let (x, y) = self.dense.dim();
+        let (w, h) = match direction {
+            Direction::X(_) => (x + size, y),
+            Direction::Y(_) => (x, y + size),
+        };
+        let mut new = Array2::default((w, h));
+        match direction {
+            Direction::X(true) => {
+                for (x, y) in (0..x).cartesian_product(0..y) {
+                    swap(&mut new[[x + size, y]], &mut self.dense[[x, y]]);
+                }
+            }
+            Direction::X(false) => {
+                for (x, y) in (0..x).cartesian_product(0..y) {
+                    swap(&mut new[[x, y]], &mut self.dense[[x, y]]);
+                }
+            }
+            Direction::Y(true) => {
+                for (x, y) in (0..x).cartesian_product(0..y) {
+                    swap(&mut new[[x, y + size]], &mut self.dense[[x, y]]);
+                }
+            }
+            Direction::Y(false) => {
+                for (x, y) in (0..x).cartesian_product(0..y) {
+                    swap(&mut new[[x, y]], &mut self.dense[[x, y]]);
+                }
             }
         }
-        Self { dense: map }
+        self.dense = new;
     }
 }
 
-impl<T> HexagonMap<T> {
+impl<T> ManhattanMap<T> {
     /// Get the value at a point, if it exists.
     pub fn get_point(&self, point: Point) -> Option<&T> {
         self.dense.get(&point)
@@ -75,12 +116,12 @@ impl<T> HexagonMap<T> {
             }
         }
     }
-    pub fn points(&self) -> impl Iterator<Item = &Point> {
+    pub fn points(&self) -> impl Iterator<Item=&Point> {
         self.dense.keys()
     }
 }
 
-impl<'i, T> IntoIterator for &'i HexagonMap<T> {
+impl<'i, T> IntoIterator for &'i ManhattanMap<T> {
     type Item = (&'i Point, &'i T);
     type IntoIter = Iter<'i, Point, T>;
 

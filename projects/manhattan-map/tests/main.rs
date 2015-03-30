@@ -1,4 +1,4 @@
-use manhattan_map::{HexagonMap, Point};
+use manhattan_map::{ManhattanMap};
 
 #[test]
 fn ready() {
@@ -7,7 +7,7 @@ fn ready() {
 
 #[test]
 fn test() {
-    let map = HexagonMap::<bool>::rhombus(3, 4);
+    let map = ManhattanMap::<bool>::square(3, 4);
     for (p, maze) in &map {
         println!("{p}: {maze}")
     }
