@@ -9,47 +9,38 @@ use ndarray::Array2;
 
 pub mod action_field;
 pub mod path_finder;
+pub mod iters;
 
 /// A dense manhattan map, if your map size will grow, or most areas will be blank, this is a better choice.
 pub struct TaxicabMap<T> {
     dense: Array2<T>,
     cycle_x: bool,
     cycle_y: bool,
+    origin_x: isize,
+    origin_y: isize,
 }
 
 impl<T: Clone> TaxicabMap<T> {
     pub fn square(width: usize, fill: &T) -> Self {
-        Self::rectangle(width, width)
+        Self::rectangle(width, width, fill)
     }
     pub fn rectangle(width: usize, height: usize, fill: &T) -> Self {
-        let mut map = Array2::default((width, height));
-        Self { cycle_x: false, cycle_y: false, dense: map }
+        let dense = Array2::from_shape_fn((width, height), |_| fill.clone());
+        Self {
+            dense,
+            cycle_x: false,
+            cycle_y: false,
+            origin_x: 0,
+            origin_y: 0,
+        }
     }
-    pub fn with_cycle(mut self, cycle_x: bool, cycle_y: bool) -> Self {
-        self.cycle_x = cycle_x;
-        self.cycle_y = cycle_y;
-        self
-    }
-    pub fn get_cycle(&self) -> (bool, bool) {
-        (self.cycle_x, self.cycle_y)
-    }
-    pub fn set_cycle(&mut self, cycle_x: bool, cycle_y: bool) {
-        self.cycle_x = cycle_x;
-        self.cycle_y = cycle_y;
-    }
-    pub fn get_point(&self, point: Point) -> Option<&T> {
-        self.dense.get(point)
-    }
-    pub fn set_point(&mut self, point: Point, value: T) {
-        self.dense[point] = value;
-    }
-    pub fn extend(&mut self, direction: Direction, size: usize) {
+    pub fn extend(&mut self, direction: Direction, size: usize, fill: &T) {
         let (x, y) = self.dense.dim();
         let (w, h) = match direction {
             Direction::X(_) => (x + size, y),
             Direction::Y(_) => (x, y + size),
         };
-        let mut new = Array2::default((w, h));
+        let mut new = Array2::from_shape_fn((w, h), |_| fill.clone());
         match direction {
             Direction::X(true) => {
                 for (x, y) in (0..x).cartesian_product(0..y) {
@@ -77,29 +68,74 @@ impl<T: Clone> TaxicabMap<T> {
 }
 
 impl<T> TaxicabMap<T> {
-    /// Get the value at a point, if it exists.
+    pub fn with_cycle(mut self, cycle_x: bool, cycle_y: bool) -> Self {
+        self.cycle_x = cycle_x;
+        self.cycle_y = cycle_y;
+        self
+    }
+    pub fn get_cycle(&self) -> (bool, bool) {
+        (self.cycle_x, self.cycle_y)
+    }
+    pub fn set_cycle(&mut self, cycle_x: bool, cycle_y: bool) {
+        self.cycle_x = cycle_x;
+        self.cycle_y = cycle_y;
+    }
+    pub fn shift_origin(&mut self, x: isize, y: isize) {
+        self.origin_x += x;
+        self.origin_y += y;
+    }
+    pub fn get_size(&self) -> (usize, usize) {
+        self.dense.dim()
+    }
+    pub fn has_point(&self, point: Point) -> bool {
+        let relative = absolute_to_relative(point.x, point.y, self);
+        let size = self.get_size();
+        relative.0 < size.0 && relative.1 < size.1
+    }
     pub fn get_point(&self, point: Point) -> Option<&T> {
-        self.dense.get(&point)
+        let relative = absolute_to_relative(point.x, point.y, self);
+        self.dense.get(relative)
     }
-    /// Add a point to the map, if it already exists, return the old value.
-    pub fn add_point(&mut self, point: Point, value: T) -> Option<T> {
-        self.dense.insert(point, value)
-    }
-    /// Get a mutable reference to a point, if it exists.
     pub fn mut_point(&mut self, point: Point) -> Option<&mut T> {
-        self.dense.get_mut(&point)
+        let relative = absolute_to_relative(point.x, point.y, self);
+        self.dense.get_mut(relative)
     }
-    /// Remove a point from the map, if it exists, return the old value.
-    pub fn remove_point(&mut self, point: Point) -> Option<T> {
-        self.dense.remove(&point)
+    pub fn set_point(&mut self, point: Point, value: T) -> bool {
+        match self.mut_point(point) {
+            Some(v) => {
+                *v = value;
+                true
+            }
+            None => false,
+        }
     }
     /// Count all defined points in the map.
     pub fn count_points(&self) -> usize {
         self.dense.len()
     }
+}
+
+fn absolute_to_relative<T>(x: isize, y: isize, map: &TaxicabMap<T>) -> (usize, usize) {
+    let (w, h) = map.get_size();
+    let (x, y) = if map.cycle_x {
+        (x % w as isize, y)
+    } else {
+        (x - map.origin_x, y)
+    };
+    let (x, y) = if map.cycle_y {
+        (x, y % h as isize)
+    } else {
+        (x, y - map.origin_y)
+    };
+    let x = if x < 0 { w as isize + x } else { x } as usize;
+    let y = if y < 0 { h as isize + y } else { y } as usize;
+    (x, y)
+}
+
+impl<T> TaxicabMap<T> {
     /// Find at most 6 points that are exists and adjacent to a point.
     pub fn nearby_points(&self, from: &Point) -> Vec<Point> {
-        from.nearby().into_iter().filter(|p| self.dense.contains_key(p)).collect()
+        from.nearby().into_iter().filter(|p| self.has_point(*p)).collect()
     }
     /// Find all points that are within a certain distance of a point.
     pub fn around_points(&self, from: &Point, distance: usize) -> Vec<Point> {
@@ -115,17 +151,5 @@ impl<T> TaxicabMap<T> {
                 points
             }
         }
-    }
-    pub fn points(&self) -> impl Iterator<Item=&Point> {
-        self.dense.keys()
-    }
-}
-
-impl<'i, T> IntoIterator for &'i TaxicabMap<T> {
-    type Item = (&'i Point, &'i T);
-    type IntoIter = Iter<'i, Point, T>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        self.dense.iter()
     }
 }

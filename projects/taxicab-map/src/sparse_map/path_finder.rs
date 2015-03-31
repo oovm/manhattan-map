@@ -106,12 +106,6 @@ impl<'a, T> PathFinder<'a, T> {
         self.action_cost = Box::new(cost);
         self
     }
-    pub fn get_point(&self, point: &Point) -> Option<&T> {
-        self.map.dense.get(point)
-    }
-    pub fn has_point(&self, point: &Point) -> bool {
-        self.map.dense.contains_key(point)
-    }
     pub fn distance_to_start(&self, point: &Point) -> usize {
         self.start.manhattan_distance(point)
     }
@@ -122,7 +116,7 @@ impl<'a, T> PathFinder<'a, T> {
     pub fn neighbors(&self, point: &Point) -> Vec<Point> {
         let mut neighbors = vec![];
         for direction in Direction::all() {
-            if let Some(target) = self.map.dense.get(&point.go(direction)) {
+            if let Some(target) = self.map.get_point(point.go(direction)) {
                 if (self.passable)(point, target) {
                     neighbors.push(point.go(direction));
                 }
@@ -131,7 +125,7 @@ impl<'a, T> PathFinder<'a, T> {
         neighbors
     }
     fn fast_reject(&self) -> bool {
-        !self.has_point(&self.start) || !self.has_point(&self.end)
+        !self.map.has_point(self.start) || !self.map.has_point(self.end)
     }
     pub fn solve_path(mut self) -> Option<Vec<Point>> {
         if self.fast_reject() {

@@ -61,7 +61,7 @@ impl<'a, T> ActionFieldSolver<'a, T> {
         let mut neighbors = Vec::with_capacity(6);
         for direction in Direction::all() {
             let key = point.go(direction);
-            if let Some(value) = self.map.dense.get(&key) {
+            if let Some(value) = self.map.get_point(key) {
                 if !(self.passable)(&key, value) {
                     continue;
                 }
