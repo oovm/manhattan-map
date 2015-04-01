@@ -88,16 +88,16 @@ impl<T> TaxicabMap<T> {
         self.dense.dim()
     }
     pub fn has_point(&self, point: Point) -> bool {
-        let relative = absolute_to_relative(point.x, point.y, self);
+        let relative = self.absolute_to_relative(point.x, point.y);
         let size = self.get_size();
         relative.0 < size.0 && relative.1 < size.1
     }
     pub fn get_point(&self, point: Point) -> Option<&T> {
-        let relative = absolute_to_relative(point.x, point.y, self);
+        let relative = self.absolute_to_relative(point.x, point.y);
         self.dense.get(relative)
     }
     pub fn mut_point(&mut self, point: Point) -> Option<&mut T> {
-        let relative = absolute_to_relative(point.x, point.y, self);
+        let relative = self.absolute_to_relative(point.x, point.y);
         self.dense.get_mut(relative)
     }
     pub fn set_point(&mut self, point: Point, value: T) -> bool {
@@ -115,21 +115,25 @@ impl<T> TaxicabMap<T> {
     }
 }
 
-fn absolute_to_relative<T>(x: isize, y: isize, map: &TaxicabMap<T>) -> (usize, usize) {
-    let (w, h) = map.get_size();
-    let (x, y) = if map.cycle_x {
-        (x % w as isize, y)
-    } else {
-        (x - map.origin_x, y)
-    };
-    let (x, y) = if map.cycle_y {
-        (x, y % h as isize)
-    } else {
-        (x, y - map.origin_y)
-    };
-    let x = if x < 0 { w as isize + x } else { x } as usize;
-    let y = if y < 0 { h as isize + y } else { y } as usize;
-    (x, y)
+impl<T> TaxicabMap<T> {
+    pub(crate) fn absolute_to_relative(&self, x: isize, y: isize) -> (usize, usize) {
+        let (w, h) = self.get_size();
+        let (w, h) = (w as isize, h as isize);
+        let (mut x, mut y) = (x - self.origin_x, y - self.origin_y);
+        if self.cycle_x {
+            x = x.rem_euclid(w);
+        }
+        if self.cycle_y {
+            y = y.rem_euclid(h);
+        }
+        (x as usize, y as usize)
+    }
+    pub(crate) fn relative_to_absolute(&self, x: usize, y: usize) -> Point {
+        Point {
+            x: x as isize + self.origin_x,
+            y: y as isize + self.origin_y,
+        }
+    }
 }
 
 impl<T> TaxicabMap<T> {
