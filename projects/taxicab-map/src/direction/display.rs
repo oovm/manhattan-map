@@ -26,21 +26,3 @@ impl Display for Direction {
         }
     }
 }
-
-impl Debug for Point {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("Point")
-            .field("x", &self.x)
-            .field("y", &self.y)
-            .finish()
-    }
-}
-
-impl Display for Point {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.debug_tuple("")
-            .field(&self.x)
-            .field(&self.y)
-            .finish()
-    }
-}

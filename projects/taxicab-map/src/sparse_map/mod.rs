@@ -1,4 +1,4 @@
-use crate::{point::Point, Direction};
+use crate::{direction::Point, Direction};
 use itertools::Itertools;
 use std::{
     cmp::Ordering,
@@ -137,11 +137,11 @@ impl<T> TaxicabMap<T> {
 }
 
 impl<T> TaxicabMap<T> {
-    /// Find at most 6 points that are exists and adjacent to a point.
+    /// Find at most 6 points that are exists and adjacent to a direction.
     pub fn nearby_points(&self, from: &Point) -> Vec<Point> {
         from.nearby().into_iter().filter(|p| self.has_point(*p)).collect()
     }
-    /// Find all points that are within a certain distance of a point.
+    /// Find all points that are within a certain distance of a direction.
     pub fn around_points(&self, from: &Point, distance: usize) -> Vec<Point> {
         match distance {
             0 => vec![*from],

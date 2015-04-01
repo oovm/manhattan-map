@@ -1,4 +1,4 @@
-use crate::{point::Point, Direction};
+use crate::{direction::Point, Direction};
 use serde::{Deserialize, Serialize};
 
 #[derive(Copy, Clone, Debug, Ord, PartialOrd, Eq, PartialEq, Hash, Serialize, Deserialize)]

@@ -15,7 +15,7 @@ impl<T> TaxicabMap<T> {
     ///
     /// # Arguments
     ///
-    /// * `passable`:  A function that returns true if the point is passable.
+    /// * `passable`:  A function that returns true if the direction is passable.
     ///
     /// returns: PathFinder<T>
     ///
@@ -56,7 +56,7 @@ impl<'a, T> ActionFieldSolver<'a, T> {
 }
 
 impl<'a, T> ActionFieldSolver<'a, T> {
-    /// Get all passable neighbors from a point
+    /// Get all passable neighbors from a direction
     pub fn neighbors(&self, point: &Point) -> Vec<(Point, f64)> {
         let mut neighbors = Vec::with_capacity(6);
         for direction in Direction::all() {

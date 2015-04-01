@@ -17,7 +17,7 @@ impl<T> TaxicabMap<T> {
     ///
     /// # Arguments
     ///
-    /// * `passable`:  A function that returns true if the point is passable.
+    /// * `passable`:  A function that returns true if the direction is passable.
     ///
     /// returns: PathFinder<T>
     ///
@@ -47,7 +47,7 @@ impl<'a, T> PathFinder<'a, T> {
     ///
     /// # Arguments
     ///
-    /// * `passable`:  A function that returns true if the point is passable.
+    /// * `passable`:  A function that returns true if the direction is passable.
     ///
     /// returns: PathFinder<T>
     ///
@@ -67,7 +67,7 @@ impl<'a, T> PathFinder<'a, T> {
     ///
     /// # Arguments
     ///
-    /// * `passable`:  A function that returns true if the point is passable.
+    /// * `passable`:  A function that returns true if the direction is passable.
     ///
     /// returns: PathFinder<T>
     ///
@@ -89,7 +89,7 @@ impl<'a, T> PathFinder<'a, T> {
     ///
     /// # Arguments
     ///
-    /// * `passable`:  A function that returns true if the point is passable.
+    /// * `passable`:  A function that returns true if the direction is passable.
     ///
     /// returns: PathFinder<T>
     ///
@@ -112,7 +112,7 @@ impl<'a, T> PathFinder<'a, T> {
     pub fn distance_to_end(&self, point: &Point) -> usize {
         self.end.manhattan_distance(point)
     }
-    /// Get all passable neighbors from a point
+    /// Get all passable neighbors from a direction
     pub fn neighbors(&self, point: &Point) -> Vec<Point> {
         let mut neighbors = vec![];
         for direction in Direction::all() {
