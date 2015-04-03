@@ -1,6 +1,7 @@
 use serde::{Serialize, Deserialize};
 use std::fmt::{Debug, Display, Formatter};
 use std::str::FromStr;
+use crate::Joint;
 
 mod display;
 mod convert;
@@ -21,5 +22,8 @@ impl Direction {
             Direction::Y(true),
             Direction::Y(false),
         ]
+    }
+    pub fn as_joint(&self, x: isize, y: isize) -> Joint {
+        Joint::new(x, y, *self)
     }
 }

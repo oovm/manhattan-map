@@ -1,14 +1,14 @@
-use crate::{direction::Point, Direction};
+use crate::{Direction};
 use itertools::Itertools;
 use std::{
     cmp::Ordering,
     collections::{btree_map::Iter, BTreeMap, BTreeSet},
 };
 use std::mem::swap;
-use ndarray::Array2;
+use ndarray::{Array2, ArrayView2};
 
-pub mod action_field;
-pub mod path_finder;
+// pub mod action_field;
+// pub mod path_finder;
 pub mod iters;
 
 /// A dense manhattan map, if your map size will grow, or most areas will be blank, this is a better choice.
@@ -19,6 +19,7 @@ pub struct TaxicabMap<T> {
     origin_x: isize,
     origin_y: isize,
 }
+
 
 impl<T: Clone> TaxicabMap<T> {
     pub fn square(width: usize, fill: &T) -> Self {
@@ -87,21 +88,23 @@ impl<T> TaxicabMap<T> {
     pub fn get_size(&self) -> (usize, usize) {
         self.dense.dim()
     }
-    pub fn has_point(&self, point: Point) -> bool {
-        let relative = self.absolute_to_relative(point.x, point.y);
-        let size = self.get_size();
-        relative.0 < size.0 && relative.1 < size.1
+    pub fn has_point(&self, x: isize, y: isize) -> bool {
+        let (w, h) = self.get_size();
+        let (i, j) = absolute_to_relative(x, y,  self.origin_x, self.origin_y, w, h, self.cycle_x, self.cycle_y);
+        i < w && j < h
     }
-    pub fn get_point(&self, point: Point) -> Option<&T> {
-        let relative = self.absolute_to_relative(point.x, point.y);
-        self.dense.get(relative)
+    pub fn get_point(&self, x: isize, y: isize) -> Option<&T> {
+        let (w, h) = self.get_size();
+        let (i, j) = absolute_to_relative(x, y,  self.origin_x, self.origin_y, w, h, self.cycle_x, self.cycle_y);
+        self.dense.get((i, j))
     }
-    pub fn mut_point(&mut self, point: Point) -> Option<&mut T> {
-        let relative = self.absolute_to_relative(point.x, point.y);
-        self.dense.get_mut(relative)
+    pub fn mut_point(&mut self, x: isize, y: isize) -> Option<&mut T> {
+        let (w, h) = self.get_size();
+        let (i, j) = absolute_to_relative(x, y,  self.origin_x, self.origin_y, w, h, self.cycle_x, self.cycle_y);
+        self.dense.get_mut((i, j))
     }
-    pub fn set_point(&mut self, point: Point, value: T) -> bool {
-        match self.mut_point(point) {
+    pub fn set_point(&mut self, x: isize, y: isize, value: T) -> bool {
+        match self.mut_point(x, y) {
             Some(v) => {
                 *v = value;
                 true
@@ -115,45 +118,21 @@ impl<T> TaxicabMap<T> {
     }
 }
 
-impl<T> TaxicabMap<T> {
-    pub(crate) fn absolute_to_relative(&self, x: isize, y: isize) -> (usize, usize) {
-        let (w, h) = self.get_size();
-        let (w, h) = (w as isize, h as isize);
-        let (mut x, mut y) = (x - self.origin_x, y - self.origin_y);
-        if self.cycle_x {
-            x = x.rem_euclid(w);
-        }
-        if self.cycle_y {
-            y = y.rem_euclid(h);
-        }
-        (x as usize, y as usize)
+
+#[inline]
+pub(crate) fn absolute_to_relative(x: isize, y: isize, origin_x: isize, origin_y: isize, w: usize, h: usize, cycle_x: bool, cycle_y: bool) -> (usize, usize) {
+    let (w, h) = (w as isize, h as isize);
+    let (mut x, mut y) = (x - origin_x, y - origin_y);
+    if cycle_x {
+        x = x.rem_euclid(w);
     }
-    pub(crate) fn relative_to_absolute(&self, x: usize, y: usize) -> Point {
-        Point {
-            x: x as isize + self.origin_x,
-            y: y as isize + self.origin_y,
-        }
+    if cycle_y {
+        y = y.rem_euclid(h);
     }
+    (x as usize, y as usize)
 }
 
-impl<T> TaxicabMap<T> {
-    /// Find at most 6 points that are exists and adjacent to a direction.
-    pub fn nearby_points(&self, from: &Point) -> Vec<Point> {
-        from.nearby().into_iter().filter(|p| self.has_point(*p)).collect()
-    }
-    /// Find all points that are within a certain distance of a direction.
-    pub fn around_points(&self, from: &Point, distance: usize) -> Vec<Point> {
-        match distance {
-            0 => vec![*from],
-            1 => self.nearby_points(from),
-            // TODO: optimize this
-            _ => {
-                let mut points = vec![];
-                for point in self.nearby_points(from) {
-                    points.extend(self.around_points(&point, distance - 1));
-                }
-                points
-            }
-        }
-    }
+#[inline]
+pub(crate) fn relative_to_absolute(x: usize, y: usize, origin_x: isize, origin_y: isize) -> (isize, isize) {
+    (x as isize + origin_x, y as isize + origin_y)
 }
