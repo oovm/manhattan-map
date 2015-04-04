@@ -6,5 +6,5 @@ mod sparse_map;
 pub use crate::{
     joint::Joint,
     direction::{Direction},
-    sparse_map::{TaxicabMap, iters::{GetTaxicabPoints, MutGetTaxicabPoints}},
+    sparse_map::{TaxicabMap, iters::{ MutGetTaxicabPoints}},
 };

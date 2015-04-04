@@ -1,12 +1,9 @@
 use crate::{Direction};
 use itertools::Itertools;
-use std::{
-    cmp::Ordering,
-    collections::{btree_map::Iter, BTreeMap, BTreeSet},
-};
 use std::mem::swap;
-use ndarray::{Array2, ArrayView2};
-
+use ndarray::{Array2};
+use std::ops::Range;
+use itertools::Product;
 // pub mod action_field;
 // pub mod path_finder;
 pub mod iters;
@@ -90,17 +87,17 @@ impl<T> TaxicabMap<T> {
     }
     pub fn has_point(&self, x: isize, y: isize) -> bool {
         let (w, h) = self.get_size();
-        let (i, j) = absolute_to_relative(x, y,  self.origin_x, self.origin_y, w, h, self.cycle_x, self.cycle_y);
+        let (i, j) = absolute_to_relative(x, y, self.origin_x, self.origin_y, w, h, self.cycle_x, self.cycle_y);
         i < w && j < h
     }
     pub fn get_point(&self, x: isize, y: isize) -> Option<&T> {
         let (w, h) = self.get_size();
-        let (i, j) = absolute_to_relative(x, y,  self.origin_x, self.origin_y, w, h, self.cycle_x, self.cycle_y);
+        let (i, j) = absolute_to_relative(x, y, self.origin_x, self.origin_y, w, h, self.cycle_x, self.cycle_y);
         self.dense.get((i, j))
     }
     pub fn mut_point(&mut self, x: isize, y: isize) -> Option<&mut T> {
         let (w, h) = self.get_size();
-        let (i, j) = absolute_to_relative(x, y,  self.origin_x, self.origin_y, w, h, self.cycle_x, self.cycle_y);
+        let (i, j) = absolute_to_relative(x, y, self.origin_x, self.origin_y, w, h, self.cycle_x, self.cycle_y);
         self.dense.get_mut((i, j))
     }
     pub fn set_point(&mut self, x: isize, y: isize, value: T) -> bool {
