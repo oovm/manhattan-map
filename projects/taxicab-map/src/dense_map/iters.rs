@@ -72,14 +72,14 @@ impl Iterator for GetTaxicabPointsAround {
 
     fn next(&mut self) -> Option<Self::Item> {
         let (x, y) = self.points.next()?;
-        let (i, j) = absolute_to_relative(x, y, self.origin_x, self.origin_y, self.w, self.h, self.cycle_x, self.cycle_y);
-        match i < self.w && j < self.h {
-            true => Some((x, y)),
-            false => self.next(),
+        match absolute_to_relative(x, y, self.origin_x, self.origin_y, self.w, self.h, self.cycle_x, self.cycle_y) {
+            Some(_) => Some((x, y)),
+            None => self.next(),
         }
     }
 }
 
+/// A diamond shaped area around a point.
 pub struct DiamondPoints {
     x: isize,
     y: isize,
@@ -111,40 +111,28 @@ impl Iterator for DiamondPoints {
 
     fn next(&mut self) -> Option<Self::Item> {
         let mut out = None;
-        if self.n == 0 {
-            if self.index == 0 {
-                self.index += 1;
-                Some((self.x, self.y))
-            }
-            else {
-                None
-            }
+        if self.n == 0 && self.index == 0 {
+            out = Some((self.x, self.y))
         }
         else {
             if self.index < self.n {
                 let k = self.index;
-                self.index += 1;
-                Some((self.x + self.n - k, self.y + k))
+                out = Some((self.x + self.n - k, self.y + k))
             }
             else if self.index < 2 * self.n {
-                self.index += 1;
                 let k = self.index - self.n;
-                Some((self.x + self.n - k, self.y + k))
+                out = Some((self.x - k, self.y + self.n - k))
             }
             else if self.index < 3 * self.n {
-                self.index += 1;
                 let k = self.index - 2 * self.n;
-                Some((self.x - k, self.y + self.n - k))
+                out = Some((self.x - self.n + k, self.y - k))
             }
             else if self.index < 4 * self.n {
-                self.index += 1;
                 let k = self.index - 3 * self.n;
-                Some((self.x - k, self.y - self.n + k))
-            }
-            else {
-                None
+                out = Some((self.x + k, self.y - self.n + k))
             }
         }
+        self.index += 1;
         out
     }
 }

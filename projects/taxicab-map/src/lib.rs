@@ -1,13 +1,15 @@
+mod dense_map;
 mod direction;
 mod illustration;
 mod joint;
-mod sparse_map;
+mod path_finder;
 
 pub use crate::{
-    direction::Direction,
-    joint::Joint,
-    sparse_map::{
+    dense_map::{
         iters::{DiamondPoints, GetTaxicabPoints, GetTaxicabPointsAround, MutGetTaxicabPoints},
         TaxicabMap,
     },
+    direction::Direction,
+    joint::Joint,
+    path_finder::PathFinder,
 };

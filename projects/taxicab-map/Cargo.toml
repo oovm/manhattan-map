@@ -2,9 +2,9 @@
 name = "taxicab-map"
 version = "0.0.0"
 authors = ["Aster <192607617@qq.com>"]
-description = "Coordinate transformation and pathfinding for hexagonal maps"
-repository = "https://github.com/oovm/hexagon-map"
-documentation = "https://docs.rs/hexagon-map"
+description = "Coordinate transformation and pathfinding for Taxicab Geometry."
+repository = "https://github.com/oovm/taxicab-map"
+documentation = "https://docs.rs/taxicab-map"
 readme = "Readme.md"
 license = "MPL-2.0"
 edition = "2021"
