@@ -1,4 +1,5 @@
-use taxicab_map::TaxicabMap;
+use itertools::Itertools;
+use taxicab_map::{DiamondPoints, TaxicabMap};
 
 #[test]
 fn ready() {
@@ -11,4 +12,12 @@ fn test() {
     for (x, y, maze) in &map {
         println!("{x}, {y}: {maze}")
     }
+}
+
+#[test]
+fn test_diamond() {
+    let points = DiamondPoints::new(0, 0, 0).collect_vec();
+    assert_eq!(points, vec![(0, 0)], "0");
+    let points = DiamondPoints::new(0, 0, 1).collect_vec();
+    assert_eq!(points, vec![(1, 0), (0, 1), (-1, 0), (0, -1)], "1");
 }

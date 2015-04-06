@@ -1,10 +1,13 @@
+mod direction;
 mod illustration;
 mod joint;
-mod direction;
 mod sparse_map;
 
 pub use crate::{
+    direction::Direction,
     joint::Joint,
-    direction::{Direction},
-    sparse_map::{TaxicabMap, iters::{ MutGetTaxicabPoints}},
+    sparse_map::{
+        iters::{DiamondPoints, GetTaxicabPoints, GetTaxicabPointsAround, MutGetTaxicabPoints},
+        TaxicabMap,
+    },
 };
