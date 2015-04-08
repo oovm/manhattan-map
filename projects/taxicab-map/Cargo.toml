@@ -1,6 +1,6 @@
 [package]
 name = "taxicab-map"
-version = "0.0.0"
+version = "0.1.1"
 authors = ["Aster <192607617@qq.com>"]
 description = "Coordinate transformation and pathfinding for Taxicab Geometry."
 repository = "https://github.com/oovm/taxicab-map"
@@ -12,7 +12,9 @@ edition = "2021"
 [dependencies]
 itertools = "0.10.5"
 serde = { version = "1.0.159", features = ["derive"] }
-ndarray = "0.15.6"
+ndarray = { version = "0.15.6", features = ["serde"] }
+ordered-float = "3.6.0"
+pathfinding = "4.2.1"
 
 [dev-dependencies]
 

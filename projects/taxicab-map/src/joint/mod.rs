@@ -1,18 +1,31 @@
 use crate::Direction;
 use serde::{Deserialize, Serialize};
+use std::fmt::{Debug, Display, Formatter};
 
-#[derive(Copy, Clone, Debug, Ord, PartialOrd, Eq, PartialEq, Hash, Serialize, Deserialize)]
+#[derive(Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Hash, Serialize, Deserialize)]
 pub struct Joint {
     x: isize,
     y: isize,
     direction: Direction,
 }
 
+impl Debug for Joint {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Joint").field("x", &self.x).field("y", &self.y).field("direction", &self.direction.to_string()).finish()
+    }
+}
+
+impl Display for Joint {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.debug_tuple("Joint").field(&self.x).field(&self.y).field(&self.direction.to_string()).finish()
+    }
+}
+
 impl Joint {
     pub fn new(x: isize, y: isize, direction: Direction) -> Self {
         Self { x, y, direction }
     }
-    pub fn from_point(x1: isize, y1: isize, x2: isize, y2: isize) -> Option<Self> {
+    pub fn from_point((x1, y1): (isize, isize), (x2, y2): (isize, isize)) -> Option<Self> {
         if x1 == x2 {
             if y1 == y2 + 1 {
                 return Some(Self::new(x1, y1, Direction::Y(false)));

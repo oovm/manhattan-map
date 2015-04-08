@@ -1,12 +1,15 @@
 use crate::Direction;
 use itertools::{Itertools, Product};
 use ndarray::Array2;
+use serde::{Deserialize, Serialize};
 use std::{mem::swap, ops::Range};
+
 // pub mod action_field;
 // pub mod path_finder;
 pub mod iters;
 
 /// A dense manhattan map, if your map size will grow, or most areas will be blank, this is a better choice.
+#[derive(Clone, Debug, Eq, PartialEq, Hash, Serialize, Deserialize)]
 pub struct TaxicabMap<T> {
     dense: Array2<T>,
     cycle_x: bool,

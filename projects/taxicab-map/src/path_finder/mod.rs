@@ -1,27 +1,25 @@
-use crate::TaxicabMap;
-use std::{collections::BTreeMap, ops::Deref};
+use crate::{Joint, TaxicabMap};
+use ordered_float::OrderedFloat;
+use pathfinding::prelude::astar;
+use std::collections::VecDeque;
 
 pub struct PathFinder<'a, T> {
     map: &'a TaxicabMap<T>,
     start: (isize, isize),
     end: (isize, isize),
-    open: BTreeMap<(isize, isize), f64>,
-    close: BTreeMap<(isize, isize), f64>,
     passable: Box<dyn Fn(isize, isize, &T) -> bool>,
     action_points: f64,
     action_cost: Box<dyn Fn(isize, isize, &T) -> f64>,
 }
 
 impl<T> TaxicabMap<T> {
-    pub fn a_star(&self, start: (isize, isize), end: (isize, isize)) -> PathFinder<T> {
-        let mut open = BTreeMap::new();
-        open.insert(start, 0.0);
+    pub fn path_finder(&self, start: (isize, isize), end: (isize, isize)) -> PathFinder<T> {
+        let mut open = VecDeque::new();
+        open.push_back((0.0, start));
         PathFinder {
             map: self,
             start,
             end,
-            open,
-            close: Default::default(),
             passable: Box::new(|_, _, _| true),
             action_points: f64::INFINITY,
             action_cost: Box::new(|_, _, _| 1.0),
@@ -50,65 +48,49 @@ impl<'a, T> PathFinder<'a, T> {
     }
 }
 
-impl<'a, T> Deref for PathFinder<'a, T> {
-    type Target = TaxicabMap<T>;
-    fn deref(&self) -> &Self::Target {
-        self.map
-    }
-}
-
 impl<'a, T> PathFinder<'a, T> {
-    fn point_passable(&self, x: isize, y: isize) -> Option<f64> {
-        let v = self.get_point(x, y)?;
-        if (self.passable)(x, y, v) { Some((self.action_cost)(x, y, v)) } else { None }
+    fn point_passable(&self, x: isize, y: isize) -> Option<OrderedFloat<f64>> {
+        let v = self.map.get_point(x, y)?;
+        if (self.passable)(x, y, v) {
+            let cost = (self.action_cost)(x, y, v);
+            Some(OrderedFloat(cost))
+        }
+        else {
+            None
+        }
     }
-    pub fn neighbors(&self, x: isize, y: isize, action_cost: f64) -> Vec<(isize, isize, f64)> {
+    fn neighbors(&self, (x, y): (isize, isize)) -> Vec<((isize, isize), OrderedFloat<f64>)> {
         let mut out = Vec::with_capacity(4);
         for (x, y) in self.map.points_nearby(x, y) {
             match self.point_passable(x, y) {
-                Some(cost) => out.push((x, y, cost + action_cost)),
+                Some(cost) => out.push(((x, y), cost)),
                 None => (),
             }
         }
         out
     }
-    fn distance(&self, (x, y): (isize, isize)) -> f64 {
-        let (dx, dy) = (x - self.end.0, y - self.end.1);
-        // no need sqrt here because we only need compare
-        (dx * dx + dy * dy) as f64
+    // taxicab distance as heuristic
+    fn heuristic(&self, (x, y): (isize, isize)) -> OrderedFloat<f64> {
+        let dx = (x - self.end.0).abs();
+        let dy = (y - self.end.1).abs();
+        OrderedFloat((dx + dy) as f64)
     }
     /// A* algorithm
-    pub fn solve_path(&mut self) -> Option<Vec<(isize, isize)>> {
-        // fast fail if end is not passable
-        if self.point_passable(self.end.0, self.end.1).is_none() {
-            return None;
-        }
-        // normal A* algorithm
-        while let Some(((x, y), cost)) = self.open.pop_last() {
-            // check if we reached the end
-            if (x, y) == self.end {
-                return Some(self.reconstruct_path((x, y)));
-            }
-            // add to close list
-            self.close.insert((x, y), cost);
-            // add neighbors to open list
-            for (x, y, cost) in self.neighbors(x, y, cost) {
-                if self.close.contains_key(&(x, y)) {
-                    continue;
-                }
-                if let Some(&old_cost) = self.open.get(&(x, y)) {
-                    if old_cost <= cost {
-                        continue;
-                    }
-                }
-                self.open.insert((x, y), cost);
-            }
-        }
-        // no path found
-        None
+    pub fn solve_path(self) -> (Vec<(isize, isize)>, f64) {
+        astar(&self.start, |p| self.neighbors(*p), |p| self.heuristic(*p), |(x, y)| self.end == (*x, *y))
+            .map(|(path, cost)| (path, cost.0))
+            .unwrap_or((vec![], f64::INFINITY))
     }
-
-    fn reconstruct_path(&self, incoming: (isize, isize)) -> Vec<(isize, isize)> {
-        todo!()
+    pub fn solve_joint(self) -> (Vec<Joint>, f64) {
+        let mut out = vec![];
+        let (path, cost) = self.solve_path();
+        if path.is_empty() {
+            return (vec![], f64::INFINITY);
+        }
+        for (from, to) in path.iter().zip(path.iter().skip(1)) {
+            // SAFETY: path is always valid
+            unsafe { out.push(Joint::from_point(*from, *to).unwrap_unchecked()) }
+        }
+        (out, cost)
     }
 }

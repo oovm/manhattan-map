@@ -45,3 +45,14 @@ fn test_nearby() {
         println!("({x}, {y}):{:?}", map.get_point(x, y))
     }
 }
+
+#[test]
+fn test_path() {
+    let mut map = TaxicabMap::<usize>::square(10, &1);
+    map.set_cycle(true, true);
+    map.shift_origin(-5, -5);
+    let (path, cost) = map.path_finder((-9, -9), (9, 9)).with_action_cost(|x, y, _| (x + y).abs() as f64).solve_joint();
+    for j in path {
+        println!("{j}: {cost}")
+    }
+}
