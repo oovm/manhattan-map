@@ -2,10 +2,14 @@ use crate::Direction;
 use itertools::{Itertools, Product};
 use ndarray::Array2;
 use serde::{Deserialize, Serialize};
-use std::{mem::swap, ops::Range};
+use std::{
+    mem::swap,
+    ops::{Index, IndexMut, Range},
+};
 
 // pub mod action_field;
 // pub mod path_finder;
+mod indexes;
 pub mod iters;
 
 /// A dense manhattan map, if your map size will grow, or most areas will be blank, this is a better choice.
@@ -78,6 +82,10 @@ impl<T> TaxicabMap<T> {
     }
     pub fn get_size(&self) -> (usize, usize) {
         self.dense.dim()
+    }
+    pub(crate) fn get_isize(&self) -> (isize, isize) {
+        let (w, h) = self.dense.dim();
+        (w as isize, h as isize)
     }
     pub fn has_point(&self, x: isize, y: isize) -> bool {
         let (w, h) = self.get_size();

@@ -156,3 +156,53 @@ impl<T> TaxicabMap<T> {
         }
     }
 }
+
+pub struct GetTaxicabLine<'i, T> {
+    map: &'i TaxicabMap<T>,
+    direction: Direction,
+    line: isize,
+}
+
+impl<'i, T> Iterator for GetTaxicabLine<'i, T> {
+    type Item = Vec<(isize, isize, &'i T)>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let (w, h) = self.map.get_isize();
+        let mut out = Vec::new();
+        match self.direction {
+            Direction::Y(rev) if self.line < h => {
+                let y = match rev {
+                    true => self.line,
+                    false => h - self.line - 1,
+                };
+                for x in 0..w {
+                    let v = self.map.get_point(x, y)?;
+                    out.push((x, y, v));
+                }
+            }
+            Direction::X(rev) if self.line < w => {
+                let x = match rev {
+                    true => self.line,
+                    false => w - self.line - 1,
+                };
+                for y in 0..h {
+                    let v = self.map.get_point(x, y)?;
+                    out.push((x, y, v));
+                }
+            }
+            _ => return None,
+        }
+        self.line += 1;
+        Some(out)
+    }
+}
+
+impl<T> TaxicabMap<T> {
+    /// Find at most 4 points that are exists and adjacent to a direction.
+    pub fn rows(&self, reverse: bool) -> GetTaxicabLine<'_, T> {
+        GetTaxicabLine { map: self, direction: Direction::Y(reverse), line: 0 }
+    }
+    pub fn columns(&self, reverse: bool) -> GetTaxicabLine<'_, T> {
+        GetTaxicabLine { map: self, direction: Direction::X(reverse), line: 0 }
+    }
+}
