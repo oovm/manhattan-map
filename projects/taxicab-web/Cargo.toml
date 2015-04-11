@@ -1,0 +1,25 @@
+[package]
+name = "taxicab-web"
+publish = false
+version = "0.0.0"
+authors = ["Aster <192607617@qq.com>"]
+description = "..."
+repository = "https://github.com/oovm/taxicab-map"
+documentation = "https://docs.rs/taxicab-web"
+readme = "Readme.md"
+license = "MPL-2.0"
+edition = "2021"
+
+[dependencies]
+dioxus = "0.3.2"
+dioxus-web = "0.3.1"
+
+
+[dependencies.taxicab-map]
+#version = "0.0.0"
+path = "../taxicab-map"
+
+[dev-dependencies]
+
+[features]
+default = []

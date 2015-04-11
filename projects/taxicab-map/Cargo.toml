@@ -5,9 +5,10 @@ authors = ["Aster <192607617@qq.com>"]
 description = "Coordinate transformation and pathfinding for Taxicab Geometry."
 repository = "https://github.com/oovm/taxicab-map"
 documentation = "https://docs.rs/taxicab-map"
-readme = "Readme.md"
+readme = "readme.md"
 license = "MPL-2.0"
 edition = "2021"
+exclude = ["package.json"]
 
 [dependencies]
 itertools = "0.10.5"

@@ -48,10 +48,12 @@ impl<'i, T> Iterator for MutGetTaxicabPoints<'i, T> {
 }
 
 impl<T> TaxicabMap<T> {
+    /// Get an iterator over all points in the map.
     pub fn points_all(&self) -> GetTaxicabPoints<'_, T> {
         let (w, h) = self.get_size();
         GetTaxicabPoints { map: self, cartesian: (0..w).cartesian_product(0..h) }
     }
+    /// Get an iterator over all points in the map.
     pub fn points_mut(&mut self) -> MutGetTaxicabPoints<T> {
         let (w, h) = self.get_size();
         MutGetTaxicabPoints { map: self, cartesian: (0..w).cartesian_product(0..h) }
@@ -90,6 +92,7 @@ pub struct DiamondPoints {
 }
 
 impl DiamondPoints {
+    /// Create a new iterator over the points in a diamond shape around a point.
     pub fn new(x: isize, y: isize, n: isize) -> Self {
         Self { x, y, n, index: 0 }
     }
@@ -219,6 +222,7 @@ impl<T> TaxicabMap<T> {
     pub fn rows(&self, reverse: bool) -> GetTaxicabLine<'_, T> {
         GetTaxicabLine { map: self, direction: Direction::Y(reverse), line: 0 }
     }
+    /// Find at most 4 joints that are exists and adjacent to a direction.
     pub fn columns(&self, reverse: bool) -> GetTaxicabLine<'_, T> {
         GetTaxicabLine { map: self, direction: Direction::X(reverse), line: 0 }
     }

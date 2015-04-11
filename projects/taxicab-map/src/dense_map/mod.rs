@@ -67,22 +67,41 @@ impl<T: Clone> TaxicabMap<T> {
 }
 
 impl<T> TaxicabMap<T> {
+    /// Get the cycle config of the map
+    pub fn get_cycle(&self) -> (bool, bool) {
+        (self.cycle_x, self.cycle_y)
+    }
+    /// Set the cycle config of the map
+    pub fn set_cycle(&mut self, cycle_x: bool, cycle_y: bool) {
+        self.cycle_x = cycle_x;
+        self.cycle_y = cycle_y;
+    }
+    /// Set the cycle config of the map
     pub fn with_cycle(mut self, cycle_x: bool, cycle_y: bool) -> Self {
         self.cycle_x = cycle_x;
         self.cycle_y = cycle_y;
         self
     }
-    pub fn get_cycle(&self) -> (bool, bool) {
-        (self.cycle_x, self.cycle_y)
+    /// Get the origin of the map
+    pub fn get_origin(&self) -> (isize, isize) {
+        (self.origin_x, self.origin_y)
     }
-    pub fn set_cycle(&mut self, cycle_x: bool, cycle_y: bool) {
-        self.cycle_x = cycle_x;
-        self.cycle_y = cycle_y;
+    /// Set the origin of the map
+    pub fn set_origin(&mut self, x: isize, y: isize) {
+        self.origin_x = x;
+        self.origin_y = y;
     }
+    /// Set the origin of the map
+    pub fn with_origin(mut self, x: isize, y: isize) -> Self {
+        self.set_origin(x, y);
+        self
+    }
+    /// Shift the origin of the map
     pub fn shift_origin(&mut self, x: isize, y: isize) {
         self.origin_x += x;
         self.origin_y += y;
     }
+    /// Shift the origin of the map
     pub fn get_size(&self) -> (usize, usize) {
         self.dense.dim()
     }
@@ -90,21 +109,25 @@ impl<T> TaxicabMap<T> {
         let (w, h) = self.dense.dim();
         (w as isize, h as isize)
     }
+    /// Get the range of the map
     pub fn has_point(&self, x: isize, y: isize) -> bool {
         let (w, h) = self.get_isize();
         absolute_to_relative(x, y, self.origin_x, self.origin_y, w, h, self.cycle_x, self.cycle_y).is_some()
     }
+    /// Get the range of the map
     pub fn get_point(&self, x: isize, y: isize) -> Option<&T> {
         let (w, h) = self.get_isize();
         let (i, j) = absolute_to_relative(x, y, self.origin_x, self.origin_y, w, h, self.cycle_x, self.cycle_y)?;
         // in fact (i, j) must be in range, could use get_unchecked
         self.dense.get((i, j))
     }
+    /// Get the range of the map
     pub fn mut_point(&mut self, x: isize, y: isize) -> Option<&mut T> {
         let (w, h) = self.get_isize();
         let (i, j) = absolute_to_relative(x, y, self.origin_x, self.origin_y, w, h, self.cycle_x, self.cycle_y)?;
         self.dense.get_mut((i, j))
     }
+    /// Get the range of the map
     pub fn set_point(&mut self, x: isize, y: isize, value: T) -> bool {
         match self.mut_point(x, y) {
             Some(v) => {

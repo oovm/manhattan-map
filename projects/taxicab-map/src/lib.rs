@@ -1,9 +1,9 @@
 #![warn(missing_docs)]
 #![deny(missing_copy_implementations)]
+#![doc = include_str!("../readme.md")]
 
 mod dense_map;
 mod direction;
-mod illustration;
 mod joint;
 mod path_finder;
 

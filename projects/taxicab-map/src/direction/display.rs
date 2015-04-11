@@ -1,4 +1,3 @@
-
 use super::*;
 
 impl FromStr for Direction {
@@ -19,10 +18,10 @@ impl FromStr for Direction {
 impl Display for Direction {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
-            Direction::X(true) => { f.write_str("→") }
-            Direction::X(false) => { f.write_str("←") }
-            Direction::Y(true) => { f.write_str("↑") }
-            Direction::Y(false) => { f.write_str("↓") }
+            Direction::X(true) => f.write_str("→"),
+            Direction::X(false) => f.write_str("←"),
+            Direction::Y(true) => f.write_str("↑"),
+            Direction::Y(false) => f.write_str("↓"),
         }
     }
 }
