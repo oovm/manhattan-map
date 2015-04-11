@@ -88,17 +88,17 @@ impl<T> TaxicabMap<T> {
         (w as isize, h as isize)
     }
     pub fn has_point(&self, x: isize, y: isize) -> bool {
-        let (w, h) = self.get_size();
+        let (w, h) = self.get_isize();
         absolute_to_relative(x, y, self.origin_x, self.origin_y, w, h, self.cycle_x, self.cycle_y).is_some()
     }
     pub fn get_point(&self, x: isize, y: isize) -> Option<&T> {
-        let (w, h) = self.get_size();
+        let (w, h) = self.get_isize();
         let (i, j) = absolute_to_relative(x, y, self.origin_x, self.origin_y, w, h, self.cycle_x, self.cycle_y)?;
         // in fact (i, j) must be in range, could use get_unchecked
         self.dense.get((i, j))
     }
     pub fn mut_point(&mut self, x: isize, y: isize) -> Option<&mut T> {
-        let (w, h) = self.get_size();
+        let (w, h) = self.get_isize();
         let (i, j) = absolute_to_relative(x, y, self.origin_x, self.origin_y, w, h, self.cycle_x, self.cycle_y)?;
         self.dense.get_mut((i, j))
     }
@@ -123,12 +123,11 @@ pub(crate) fn absolute_to_relative(
     y: isize,
     origin_x: isize,
     origin_y: isize,
-    w: usize,
-    h: usize,
+    w: isize,
+    h: isize,
     cycle_x: bool,
     cycle_y: bool,
 ) -> Option<(usize, usize)> {
-    let (w, h) = (w as isize, h as isize);
     let (mut x, mut y) = (x - origin_x, y - origin_y);
     if cycle_x {
         x = x.rem_euclid(w);

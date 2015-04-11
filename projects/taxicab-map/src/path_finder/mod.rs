@@ -88,8 +88,7 @@ impl<'a, T> PathFinder<'a, T> {
             return (vec![], f64::INFINITY);
         }
         for (from, to) in path.iter().zip(path.iter().skip(1)) {
-            // SAFETY: path is always valid
-            unsafe { out.push(Joint::from_point(*from, *to).unwrap_unchecked()) }
+            out.push(Joint::from_point(*from, *to))
         }
         (out, cost)
     }

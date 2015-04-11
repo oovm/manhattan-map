@@ -1,6 +1,6 @@
 [package]
 name = "taxicab-map"
-version = "0.1.1"
+version = "0.1.3"
 authors = ["Aster <192607617@qq.com>"]
 description = "Coordinate transformation and pathfinding for Taxicab Geometry."
 repository = "https://github.com/oovm/taxicab-map"

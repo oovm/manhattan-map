@@ -1,4 +1,5 @@
 use super::*;
+use crate::Joint;
 
 impl<'i, T> IntoIterator for &'i TaxicabMap<T> {
     type Item = (isize, isize, &'i T);
@@ -61,8 +62,8 @@ pub struct GetTaxicabPointsAround {
     points: DiamondPoints,
     origin_x: isize,
     origin_y: isize,
-    w: usize,
-    h: usize,
+    w: isize,
+    h: isize,
     cycle_x: bool,
     cycle_y: bool,
 }
@@ -139,12 +140,19 @@ impl Iterator for DiamondPoints {
 
 impl<T> TaxicabMap<T> {
     /// Find at most 4 points that are exists and adjacent to a direction.
-    pub fn points_nearby(&self, x: isize, y: isize) -> GetTaxicabPointsAround {
-        self.points_around(x, y, 1)
+    pub fn points_nearby(&self, x: isize, y: isize) -> Vec<(isize, isize)> {
+        self.points_around(x, y, 1).collect_vec()
+    }
+    pub fn joints_nearby(&self, x: isize, y: isize) -> Vec<Joint> {
+        let mut out = Vec::with_capacity(4);
+        for (tx, ty) in self.points_around(x, y, 1) {
+            out.push(Joint::from_point((x, y), (tx, ty)))
+        }
+        out
     }
     /// Find all points that are within a certain distance of a direction.
     pub fn points_around(&self, x: isize, y: isize, steps: usize) -> GetTaxicabPointsAround {
-        let (w, h) = self.get_size();
+        let (w, h) = self.get_isize();
         GetTaxicabPointsAround {
             points: DiamondPoints::new(x, y, steps as isize),
             origin_x: self.origin_x,
