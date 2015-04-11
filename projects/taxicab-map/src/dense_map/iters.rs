@@ -1,5 +1,4 @@
 use super::*;
-use crate::Joint;
 
 impl<'i, T> IntoIterator for &'i TaxicabMap<T> {
     type Item = (isize, isize, &'i T);
@@ -9,11 +8,13 @@ impl<'i, T> IntoIterator for &'i TaxicabMap<T> {
     }
 }
 
+/// Traverse all points in the map, return the absolute coordinates and the value in the modified coordinates
 pub struct GetTaxicabPoints<'i, T> {
     map: &'i TaxicabMap<T>,
     cartesian: Product<Range<usize>, Range<usize>>,
 }
 
+/// Mutable traversal of all points in the map, return the absolute coordinates and the value in the modified coordinates
 pub struct MutGetTaxicabPoints<'i, T> {
     map: &'i mut TaxicabMap<T>,
     cartesian: Product<Range<usize>, Range<usize>>,
@@ -94,22 +95,23 @@ impl DiamondPoints {
     }
 }
 
-//      0: (x + n, y)
-//      1: (x + n - 1, y + 1)
-//      2: (x + n - 2, y + 2)
-//  n    : (x, y + n)
-//  n + 1: (x - 1, y + n - 1)
-//  n + 2: (x - 2, y + n - 2)
-// 2n    : (x - n, y)
-// 2n + 1: (x - n + 1, y - 1)
-// 2n + 2: (x - n + 2, y - 2)
-// 3n    : (x, y - n)
-// 3n + 1: (x + 1, y - n + 1)
-// 3n + 2: (x + 2, y - n + 2)
-// 4n - 1: (x + n - 1, y - 1)
 impl Iterator for DiamondPoints {
     type Item = (isize, isize);
-
+    /// ```txt
+    ///      0: (x + n, y)
+    ///      1: (x + n - 1, y + 1)
+    ///      2: (x + n - 2, y + 2)
+    ///  n    : (x, y + n)
+    ///  n + 1: (x - 1, y + n - 1)
+    ///  n + 2: (x - 2, y + n - 2)
+    /// 2n    : (x - n, y)
+    /// 2n + 1: (x - n + 1, y - 1)
+    /// 2n + 2: (x - n + 2, y - 2)
+    /// 3n    : (x, y - n)
+    /// 3n + 1: (x + 1, y - n + 1)
+    /// 3n + 2: (x + 2, y - n + 2)
+    /// 4n - 1: (x + n - 1, y - 1)
+    /// ```
     fn next(&mut self) -> Option<Self::Item> {
         let mut out = None;
         if self.n == 0 && self.index == 0 {
@@ -140,15 +142,12 @@ impl Iterator for DiamondPoints {
 
 impl<T> TaxicabMap<T> {
     /// Find at most 4 points that are exists and adjacent to a direction.
-    pub fn points_nearby(&self, x: isize, y: isize) -> Vec<(isize, isize)> {
-        self.points_around(x, y, 1).collect_vec()
+    pub fn points_nearby(&self, x: isize, y: isize) -> impl Iterator<Item = (isize, isize)> {
+        self.points_around(x, y, 1)
     }
-    pub fn joints_nearby(&self, x: isize, y: isize) -> Vec<Joint> {
-        let mut out = Vec::with_capacity(4);
-        for (tx, ty) in self.points_around(x, y, 1) {
-            out.push(Joint::from_point((x, y), (tx, ty)))
-        }
-        out
+    /// Find at most 4 joints that are exists and adjacent to a direction.
+    pub fn joints_nearby(&self, x: isize, y: isize) -> impl Iterator<Item = Joint> {
+        self.points_around(x, y, 1).map(move |(tx, ty)| Joint::from_point((x, y), (tx, ty)))
     }
     /// Find all points that are within a certain distance of a direction.
     pub fn points_around(&self, x: isize, y: isize, steps: usize) -> GetTaxicabPointsAround {
@@ -165,6 +164,7 @@ impl<T> TaxicabMap<T> {
     }
 }
 
+/// Get all lines in a taxicab map.
 pub struct GetTaxicabLine<'i, T> {
     map: &'i TaxicabMap<T>,
     direction: Direction,
@@ -202,6 +202,15 @@ impl<'i, T> Iterator for GetTaxicabLine<'i, T> {
         }
         self.line += 1;
         Some(out)
+    }
+}
+
+impl<'i, T> GetTaxicabLine<'i, T> {
+    pub fn get_direction(&self) -> Direction {
+        self.direction
+    }
+    pub fn get_line(&self) -> usize {
+        self.line as usize
     }
 }
 

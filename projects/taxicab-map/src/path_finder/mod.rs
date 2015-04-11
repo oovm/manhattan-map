@@ -3,31 +3,26 @@ use ordered_float::OrderedFloat;
 use pathfinding::prelude::astar;
 use std::collections::VecDeque;
 
+/// A* path finder on a taxicab map.
 pub struct PathFinder<'a, T> {
     map: &'a TaxicabMap<T>,
     start: (isize, isize),
     end: (isize, isize),
     passable: Box<dyn Fn(isize, isize, &T) -> bool>,
-    action_points: f64,
     action_cost: Box<dyn Fn(isize, isize, &T) -> f64>,
 }
 
 impl<T> TaxicabMap<T> {
+    /// Create a path finder.
     pub fn path_finder(&self, start: (isize, isize), end: (isize, isize)) -> PathFinder<T> {
         let mut open = VecDeque::new();
         open.push_back((0.0, start));
-        PathFinder {
-            map: self,
-            start,
-            end,
-            passable: Box::new(|_, _, _| true),
-            action_points: f64::INFINITY,
-            action_cost: Box::new(|_, _, _| 1.0),
-        }
+        PathFinder { map: self, start, end, passable: Box::new(|_, _, _| true), action_cost: Box::new(|_, _, _| 1.0) }
     }
 }
 
 impl<'a, T> PathFinder<'a, T> {
+    /// Set the passable function.
     pub fn with_passable<F>(mut self, passable: F) -> Self
     where
         F: Fn(isize, isize, &T) -> bool + 'static,
@@ -35,15 +30,12 @@ impl<'a, T> PathFinder<'a, T> {
         self.passable = Box::new(passable);
         self
     }
+    /// Set the action cost function.
     pub fn with_action_cost<F>(mut self, cost: F) -> Self
     where
         F: Fn(isize, isize, &T) -> f64 + 'static,
     {
         self.action_cost = Box::new(cost);
-        self
-    }
-    pub fn with_action_points(mut self, action_points: f64) -> Self {
-        self.action_points = action_points;
         self
     }
 }
@@ -81,6 +73,7 @@ impl<'a, T> PathFinder<'a, T> {
             .map(|(path, cost)| (path, cost.0))
             .unwrap_or((vec![], f64::INFINITY))
     }
+    /// Solve by path and convert to joints
     pub fn solve_joint(self) -> (Vec<Joint>, f64) {
         let mut out = vec![];
         let (path, cost) = self.solve_path();

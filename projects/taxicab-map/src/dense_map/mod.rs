@@ -1,4 +1,4 @@
-use crate::Direction;
+use crate::{Direction, Joint};
 use itertools::{Itertools, Product};
 use ndarray::Array2;
 use serde::{Deserialize, Serialize};
@@ -23,13 +23,16 @@ pub struct TaxicabMap<T> {
 }
 
 impl<T: Clone> TaxicabMap<T> {
+    /// Create a square taxicab map, fill with cloneable value
     pub fn square(width: usize, fill: &T) -> Self {
         Self::rectangle(width, width, fill)
     }
+    /// Create a rectangle taxicab map, fill with cloneable value
     pub fn rectangle(width: usize, height: usize, fill: &T) -> Self {
         let dense = Array2::from_shape_fn((width, height), |_| fill.clone());
         Self { dense, cycle_x: false, cycle_y: false, origin_x: 0, origin_y: 0 }
     }
+    /// Extend the map in a direction, fill with cloneable value
     pub fn extend(&mut self, direction: Direction, size: usize, fill: &T) {
         let (x, y) = self.dense.dim();
         let (w, h) = match direction {

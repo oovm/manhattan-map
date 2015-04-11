@@ -1,3 +1,6 @@
+#![warn(missing_docs)]
+#![deny(missing_copy_implementations)]
+
 mod dense_map;
 mod direction;
 mod illustration;
